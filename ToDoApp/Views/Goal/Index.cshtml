@@ -1,0 +1,65 @@
+﻿@model IEnumerable<ToDoApp.Models.ToDoGoal>
+
+@{
+    ViewData["Title"] = "Goals";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">New goal</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DueDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Notes)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var trClass = (item.IsDone ? " done" : "");
+            
+            <tr data-id="@item.Id" class="@trClass">
+                <td>
+                    <div class="goal-item">
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </div>
+                </td>
+                <td>
+                    @{
+                        var date = string.Empty;
+                        if (item.DueDate != null)
+                        {
+                            date = ((DateTime)item.DueDate).ToShortDateString();
+                        }
+                    }
+                    @date
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Notes)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id"><i class="icon-normal fas fa-edit"></i></a>
+                    <i class="icon-normal delete deleteGoal fas fa-trash"></i>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    var UrlSettings = {
+        ToggleDoneGoalUrl: '@Url.Action("ToggleDone", "Goal")',
+        DeleteGoalUrl : '@Url.Action("Delete", "Goal")'
+        }
+</script>

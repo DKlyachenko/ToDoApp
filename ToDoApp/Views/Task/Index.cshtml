@@ -1,0 +1,68 @@
+﻿@model IEnumerable<ToDoTask>
+
+@{
+    ViewData["Title"] = "Tasks";
+    List<ToDoGoal> goals = (List<ToDoGoal>)ViewData["Goals"];
+}
+
+<h1>Your tasks</h1>
+
+
+<table class="table">
+    <thead>
+            <tr>
+                <th>
+                </th>
+                <th>
+                    <i class="icon-normal delete fas fa-trash-alt" onclick="deleteDoneTasks()"></i>
+                </th>
+            </tr>
+        </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr data-id="@item.Id">
+                <td >
+                    @{ 
+                        var itemClass = "task-item" + (item.IsDone ? " done" : "");
+                    }
+                    <div class="@itemClass">                        
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </div>
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id"><i class="icon-normal fas fa-edit"></i></a>
+                    
+                    <i class="icon-normal delete deleteTask fas fa-trash"></i>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="panel-footer add-item-form">
+    @await Html.PartialAsync("AddItem", new ToDoApp.Models.ToDoTask())
+</div>
+
+<h1 style="margin-top:5%">Your goals</h1>
+<table class="table" >    
+    <tbody>
+        @foreach (var item in goals)
+        {
+            <tr>
+                <td>
+                    @item.Title
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    var UrlSettings = {
+        ToggleDoneTaskUrl: '@Url.Action("ToggleDone", "Task")',
+        DeleteTaskUrl: '@Url.Action("Delete", "Task")',
+        DeleteDoneTasksUrl : '@Url.Action("DeleteDoneTasks", "Task")'
+        }
+</script>

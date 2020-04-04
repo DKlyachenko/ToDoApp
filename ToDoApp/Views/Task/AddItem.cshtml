@@ -1,0 +1,12 @@
+﻿@model ToDoApp.Models.ToDoTask
+
+<form asp-action="Create" method="POST">
+    <div class="row">
+        <div class="col-6">
+            <input asp-for="Title" placeholder="New Item" class="form-control">
+        </div>
+        <div class="col-4">
+            <button type="submit" class="btn btn-outline-secondary">Add</button>
+        </div>
+    </div>
+</form>
