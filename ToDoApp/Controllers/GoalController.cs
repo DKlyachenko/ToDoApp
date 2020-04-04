@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ToDoApp.Core.Models;
 using ToDoApp.Data;
-using ToDoApp.Models;
 
 namespace ToDoApp.Controllers
 {
     public class GoalController : Controller
     {
         private ApplicationContext _db;
+        //private IRepository _repository
 
         public GoalController (ApplicationContext context)
         {
