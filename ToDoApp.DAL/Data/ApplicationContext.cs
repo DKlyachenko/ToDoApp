@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ToDoApp.Models;
+using ToDoApp.Core.Models;
 
-namespace ToDoApp.Data
+namespace ToDoApp.DAL.Data
 {
     public class ApplicationContext : DbContext
     {

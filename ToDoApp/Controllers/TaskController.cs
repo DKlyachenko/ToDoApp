@@ -5,36 +5,34 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ToDoApp.Data;
-using ToDoApp.Models;
+using ToDoApp.Core.Models;
+using ToDoApp.DAL;
+using ToDoApp.DAL.Data;
 
 namespace ToDoApp.Controllers
 {
     public class TaskController : Controller
     {
-        private ApplicationContext _db;
+        private IRepository _repository;
 
-        public TaskController(ApplicationContext context)
+        public TaskController(IRepository repository)
         {
-            _db = context;
+            _repository = repository;
         }
-        // GET: Task
+
         public async Task<IActionResult> Index()
         {
-            ViewData["Goals"] = _db.ToDoGoals.Where(x=> !x.IsArchived && !x.IsDone).ToList();
-            return View(await _db.ToDoTasks.Where(x => !x.IsArchived).ToListAsync());
+            ViewData["Goals"] = await _repository.GetActualGoals();
+            return View(await _repository.GetNonArchivedTasks());
         }
 
-        
-        // POST: Task/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ToDoTask task)
         {
             try
             {
-                _db.ToDoTasks.Add(task);
-                await _db.SaveChangesAsync();
+                await _repository.AddTask(task);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -51,8 +49,7 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                _db.ToDoTasks.Update(task);
-                await _db.SaveChangesAsync();
+                await _repository.UpdateTask(task);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -61,39 +58,34 @@ namespace ToDoApp.Controllers
             }
         }
 
-        // GET: Task/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            ToDoTask task = await _db.ToDoTasks.FirstOrDefaultAsync(p => p.Id == id);
+            var task = await _repository.GetTask(id);
             if (task != null)
                 return View(task);
             return NotFound();
         }
 
-        // GET: Task/Delete/5
         [HttpGet]
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(int id)
         {
-            ToDoTask task = await _db.ToDoTasks.FirstOrDefaultAsync(p => p.Id == id);
+            var task = await _repository.GetTask(id);
             if (task != null)
                 return View(task);
             return NotFound();
         }
 
-        // POST: Task/Delete/5
         [HttpPost]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                // TODO: Add delete logic here
-                ToDoTask task = await _db.ToDoTasks.FirstOrDefaultAsync(p => p.Id == id);
+                var task = await _repository.GetTask(id);
                 if (task != null)
                 {
-                    _db.ToDoTasks.Remove(task);
-                    await _db.SaveChangesAsync();
+                    await _repository.DeleteTask(task);
                     return RedirectToAction(nameof(Index));
                 }
                 return NotFound();
@@ -106,16 +98,15 @@ namespace ToDoApp.Controllers
 
         [HttpPost]
         //[ValidateAntiForgeryToken]
-        public IActionResult ToggleDone(int id)
+        public async Task<IActionResult> ToggleDone(int id)
         {
             try
             {
-                ToDoTask task = _db.ToDoTasks.FirstOrDefault(p => p.Id == id);
+                var task = await _repository.GetTask(id);
                 if (task != null)
                 {
                     task.IsDone = !task.IsDone;
-                    //_db.ToDoTasks.Update(task);
-                    _db.SaveChanges();
+                    await _repository.UpdateTask(task);
                     return null;
                 }
                 return NotFound();
@@ -128,9 +119,7 @@ namespace ToDoApp.Controllers
 
         public IActionResult DeleteDoneTasks()
         {
-            var tasksToDelete = _db.ToDoTasks.Where(x => !x.IsArchived && x.IsDone);
-            _db.RemoveRange(tasksToDelete);
-            _db.SaveChanges();
+            _repository.DeleteDoneTasks();
             return RedirectToAction(nameof(Index));
         }
     }

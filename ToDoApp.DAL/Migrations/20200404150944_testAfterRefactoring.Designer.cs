@@ -5,23 +5,23 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ToDoApp.Data;
+using ToDoApp.DAL.Data;
 
-namespace ToDoApp.Migrations
+namespace ToDoApp.DAL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200318081425_Init")]
-    partial class Init
+    [Migration("20200404150944_testAfterRefactoring")]
+    partial class testAfterRefactoring
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.2")
+                .HasAnnotation("ProductVersion", "3.1.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("ToDoApp.Models.ToDoGoal", b =>
+            modelBuilder.Entity("ToDoApp.Core.Models.ToDoGoal", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -51,7 +51,7 @@ namespace ToDoApp.Migrations
                     b.ToTable("ToDoGoals");
                 });
 
-            modelBuilder.Entity("ToDoApp.Models.ToDoTask", b =>
+            modelBuilder.Entity("ToDoApp.Core.Models.ToDoTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

@@ -1,6 +1,6 @@
 using System;
 
-namespace ToDoApp.Models
+namespace ToDoApp.Core.Models
 {
     public class ErrorViewModel
     {
