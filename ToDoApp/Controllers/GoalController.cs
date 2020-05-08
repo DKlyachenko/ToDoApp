@@ -6,29 +6,24 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Core.Models;
-using ToDoApp.Data;
+using ToDoApp.DAL.Data;
+using ToDoApp.DAL;
 
 namespace ToDoApp.Controllers
 {
     public class GoalController : Controller
     {
-        private ApplicationContext _db;
-        //private IRepository _repository
+        private IRepository _repository;
 
-        public GoalController (ApplicationContext context)
+        public GoalController (IRepository repository)
         {
-            _db = context;
+            _repository = repository;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await _db.ToDoGoals.ToListAsync());
-        }
-        
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
+            return View(await _repository.GetAllGoals());
+        }       
 
         public ActionResult Create()
         {
@@ -41,8 +36,7 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                _db.ToDoGoals.Add(goal);
-                await _db.SaveChangesAsync();
+                await _repository.AddGoal(goal);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -53,7 +47,7 @@ namespace ToDoApp.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            ToDoGoal goal = await _db.ToDoGoals.FirstOrDefaultAsync(p => p.Id == id);
+            ToDoGoal goal = await _repository.GetGoal(id);
             if (goal != null)
                 return View(goal);
             return NotFound();
@@ -65,8 +59,7 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                _db.ToDoGoals.Update(goal);
-                await _db.SaveChangesAsync();
+                await _repository.UpdateGoal(goal);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -80,11 +73,10 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                ToDoGoal goal = await _db.ToDoGoals.FirstOrDefaultAsync(p => p.Id == id);
+                ToDoGoal goal = await _repository.GetGoal(id);
                 if (goal != null)
                 {
-                    _db.ToDoGoals.Remove(goal);
-                    await _db.SaveChangesAsync();
+                    await _repository.DeleteGoal(goal);
                     return RedirectToAction(nameof(Index));
                 }
                 return NotFound();
@@ -96,15 +88,15 @@ namespace ToDoApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult ToggleDone(int id)
+        public async Task<IActionResult> ToggleDone(int id)
         {
             try
             {
-                ToDoGoal goal = _db.ToDoGoals.FirstOrDefault(p => p.Id == id);
+                var goal = await _repository.GetGoal(id);
                 if (goal != null)
                 {
                     goal.IsDone = !goal.IsDone;
-                    _db.SaveChanges();
+                    await _repository.UpdateGoal(goal);
                     return null;
                 }
                 return NotFound();
