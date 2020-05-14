@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -80,26 +81,32 @@ namespace ToDoApp.Controllers
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+            var ret = new ReturnResult();
             try
             {
                 var task = await _repository.GetTask(id);
                 if (task != null)
                 {
                     await _repository.DeleteTask(task);
-                    return RedirectToAction(nameof(Index));
+                    ret.Success = true;
+                } else
+                {
+                    ret.Error = StaticData.taskFindError;
                 }
-                return NotFound();
+                
             }
-            catch
+            catch (Exception e)
             {
-                return View();
+                ret.Error = e.Message;
             }
+            return Json(ret);
         }
 
         [HttpPost]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleDone(int id)
         {
+            var ret = new ReturnResult();
             try
             {
                 var task = await _repository.GetTask(id);
@@ -107,14 +114,16 @@ namespace ToDoApp.Controllers
                 {
                     task.IsDone = !task.IsDone;
                     await _repository.UpdateTask(task);
-                    return null;
+                    ret.Success = true;
+                } else {
+                    ret.Error = StaticData.taskFindError;
                 }
-                return NotFound();
             }
-            catch
+            catch (Exception e)
             {
-                return RedirectToAction(nameof(Index));
+                ret.Error = e.Message;
             }
+            return Json(ret);
         }
 
         public IActionResult DeleteDoneTasks()

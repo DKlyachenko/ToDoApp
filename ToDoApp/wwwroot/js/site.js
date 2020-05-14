@@ -20,6 +20,14 @@ $(document).ready(function () {
     });
 });
 
+onSuccess = function (data, callback) {
+    if (data.success && callback) {
+        callback();
+    } else {
+        alert(data.error);
+    }
+};
+
 function toggleDoneTask(item) {    
     var tr = item.closest('tr');
 
@@ -28,13 +36,18 @@ function toggleDoneTask(item) {
     }
 
     var taskId = tr.getAttribute('data-id');
+    var callbackFunc = function () {
+        $(item).toggleClass('done');
+    }
 
     $.ajax({
         type: "POST",
         url: UrlSettings.ToggleDoneTaskUrl,
-        data: { id: taskId }
+        data: { id: taskId },
+        success: data => {
+            onSuccess(data, callbackFunc);
+        },
     });
-    $(item).toggleClass('done');
 }
 
 function toggleDoneGoal(item) {
@@ -46,12 +59,19 @@ function toggleDoneGoal(item) {
 
     var goalId = tr.getAttribute('data-id');
 
+    var callbackFunc = function () {
+        $(tr).toggleClass('done');
+    }
+
     $.ajax({
         type: "POST",
         url: UrlSettings.ToggleDoneGoalUrl,
-        data: { id: goalId }
+        data: { id: goalId },
+        success: data => {
+            onSuccess(data, callbackFunc);
+        },
     });
-    $(tr).toggleClass('done');
+    
 }
 
 function deleteTask(item) {
@@ -61,14 +81,21 @@ function deleteTask(item) {
         return;
     }
 
+    var callbackFunc = function () {
+        $(tr).remove();
+    }
+
     var taskId = tr.getAttribute('data-id');
 
     $.ajax({
         type: "POST",
         url: UrlSettings.DeleteTaskUrl,
-        data: { id: taskId }
+        data: { id: taskId },
+        success: data => {
+            onSuccess(data, callbackFunc);
+        }
     });
-    $(tr).remove();
+    
 }
 
 function deleteGoal(item) {
@@ -78,14 +105,20 @@ function deleteGoal(item) {
         return;
     }
 
+    var callbackFunc = function () {
+        $(tr).remove();
+    }
+
     var goalId = tr.getAttribute('data-id');
 
     $.ajax({
         type: "POST",
         url: UrlSettings.DeleteGoalUrl,
-        data: { id: goalId }
+        data: { id: goalId },
+        success: data => {
+            onSuccess(data, callbackFunc);
+        }
     });
-    $(tr).remove();
 }
 
 function deleteDoneTasks() {
