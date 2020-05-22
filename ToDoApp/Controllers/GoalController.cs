@@ -15,7 +15,7 @@ namespace ToDoApp.Controllers
     {
         private IRepository _repository;
 
-        public GoalController (IRepository repository)
+        public GoalController(IRepository repository)
         {
             _repository = repository;
         }
@@ -23,7 +23,7 @@ namespace ToDoApp.Controllers
         public async Task<IActionResult> Index()
         {
             return View(await _repository.GetAllGoals());
-        }       
+        }
 
         public ActionResult Create()
         {
@@ -71,25 +71,31 @@ namespace ToDoApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
+            var ret = new ReturnResult();
             try
             {
                 ToDoGoal goal = await _repository.GetGoal(id);
                 if (goal != null)
                 {
                     await _repository.DeleteGoal(goal);
-                    return RedirectToAction(nameof(Index));
+                    ret.Success = true;
+                } else
+                {
+                    ret.Error = StaticData.goalFindError;
                 }
-                return NotFound();
             }
-            catch
+            catch (Exception e)
             {
-                return View();
+                ret.Error = e.Message;
             }
+
+            return Json(ret);
         }
 
         [HttpPost]
         public async Task<IActionResult> ToggleDone(int id)
         {
+            var ret = new ReturnResult();
             try
             {
                 var goal = await _repository.GetGoal(id);
@@ -97,14 +103,19 @@ namespace ToDoApp.Controllers
                 {
                     goal.IsDone = !goal.IsDone;
                     await _repository.UpdateGoal(goal);
-                    return null;
+                    ret.Success = true;
                 }
-                return NotFound();
+                else
+                {
+                    ret.Error = StaticData.goalFindError;
+                }
             }
-            catch
+            catch (Exception e)
             {
-                return RedirectToAction(nameof(Index));
+                ret.Error = e.Message;
             }
+
+            return Json(ret);
         }
     }
 }
