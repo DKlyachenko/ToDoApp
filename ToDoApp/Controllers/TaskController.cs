@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ToDoApp.Core;
 using ToDoApp.Core.Models;
+using ToDoApp.Core.Services;
 using ToDoApp.DAL;
 using ToDoApp.DAL.Data;
 
@@ -14,17 +16,17 @@ namespace ToDoApp.Controllers
 {
     public class TaskController : Controller
     {
-        private IRepository _repository;
+        private TasksService _tasksService;
 
-        public TaskController(IRepository repository)
+        public TaskController(TasksService tasksService)
         {
-            _repository = repository;
+            _tasksService = tasksService;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewData["Goals"] = await _repository.GetActualGoals();
-            return View(await _repository.GetNonArchivedTasks());
+            ViewData["Goals"] = await _tasksService.GetActualGoals();
+            return View(await _tasksService.GetNonArchivedTasks());
         }
 
         [HttpPost]
@@ -33,7 +35,7 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                await _repository.AddTask(task);
+                await _tasksService.AddTask(task);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -50,7 +52,7 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                await _repository.UpdateTask(task);
+                await _tasksService.UpdateTask(task);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -61,7 +63,7 @@ namespace ToDoApp.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var task = await _repository.GetTask(id);
+            var task = await _tasksService.GetTask(id);
             if (task != null)
                 return View(task);
             return NotFound();
@@ -71,64 +73,29 @@ namespace ToDoApp.Controllers
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(int id)
         {
-            var task = await _repository.GetTask(id);
+            var task = await _tasksService.GetTask(id);
             if (task != null)
                 return View(task);
             return NotFound();
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var ret = new ReturnResult();
-            try
-            {
-                var task = await _repository.GetTask(id);
-                if (task != null)
-                {
-                    await _repository.DeleteTask(task);
-                    ret.Success = true;
-                } else
-                {
-                    ret.Error = StaticData.taskFindError;
-                }
-                
-            }
-            catch (Exception e)
-            {
-                ret.Error = e.Message;
-            }
+            var ret = await _tasksService.Delete(id);
             return Json(ret);
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleDone(int id)
         {
-            var ret = new ReturnResult();
-            try
-            {
-                var task = await _repository.GetTask(id);
-                if (task != null)
-                {
-                    task.IsDone = !task.IsDone;
-                    await _repository.UpdateTask(task);
-                    ret.Success = true;
-                } else {
-                    ret.Error = StaticData.taskFindError;
-                }
-            }
-            catch (Exception e)
-            {
-                ret.Error = e.Message;
-            }
+            var ret = await _tasksService.ToggleDone(id);
             return Json(ret);
         }
 
         public IActionResult DeleteDoneTasks()
         {
-            _repository.DeleteDoneTasks();
+            _tasksService.DeleteDoneTasks();
             return RedirectToAction(nameof(Index));
         }
     }

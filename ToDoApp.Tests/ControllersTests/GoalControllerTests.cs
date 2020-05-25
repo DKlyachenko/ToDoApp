@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ToDoApp.Controllers;
 using ToDoApp.Core.Models;
+using ToDoApp.Core.Services;
 using ToDoApp.Tests.FakeEntities;
 using Xunit;
 
@@ -15,10 +16,12 @@ namespace ToDoApp.Tests.ControllersTests
     {
         MockRepository repository;
         GoalController goalController;
+        GoalsService goalsService;
         public GoalControllerTests()
         {
             repository = new MockRepository();
-            goalController = new GoalController(repository);
+            goalsService = new GoalsService(repository);
+            goalController = new GoalController(goalsService);
         }
 
         [Fact]

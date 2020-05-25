@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ToDoApp.Controllers;
 using ToDoApp.Core.Models;
+using ToDoApp.Core.Services;
 using ToDoApp.Tests.FakeEntities;
 using Xunit;
 
@@ -15,14 +16,16 @@ namespace ToDoApp.Tests.ControllersTests
     {
         MockRepository repository;
         TaskController taskController;
+        TasksService tasksService;
         public TaskControllerTests()
         {
             repository = new MockRepository();
-            taskController = new TaskController(repository);
+            tasksService = new TasksService(repository);
+            taskController = new TaskController(tasksService);
         }
 
         [Fact]
-        public async Task Index_Should_Have_NonArchived_Tasks()
+        public async Task Index_Should_Return_NonArchived_Tasks()
         {
 
             var expectedCount = 3;

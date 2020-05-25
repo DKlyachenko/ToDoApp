@@ -6,23 +6,24 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Core.Models;
-using ToDoApp.DAL.Data;
 using ToDoApp.DAL;
+using ToDoApp.Core;
+using ToDoApp.Core.Services;
 
 namespace ToDoApp.Controllers
 {
     public class GoalController : Controller
     {
-        private IRepository _repository;
+        private GoalsService _goalsService;
 
-        public GoalController(IRepository repository)
+        public GoalController(GoalsService goalsService)
         {
-            _repository = repository;
+            _goalsService = goalsService;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await _repository.GetAllGoals());
+            return View(await _goalsService.GetAllGoals());
         }
 
         public ActionResult Create()
@@ -36,7 +37,7 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                await _repository.AddGoal(goal);
+                await _goalsService.AddGoal(goal);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -47,7 +48,7 @@ namespace ToDoApp.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            ToDoGoal goal = await _repository.GetGoal(id);
+            ToDoGoal goal = await _goalsService.GetGoal(id);
             if (goal != null)
                 return View(goal);
             return NotFound();
@@ -59,7 +60,7 @@ namespace ToDoApp.Controllers
         {
             try
             {
-                await _repository.UpdateGoal(goal);
+                await _goalsService.UpdateGoal(goal);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -71,50 +72,14 @@ namespace ToDoApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var ret = new ReturnResult();
-            try
-            {
-                ToDoGoal goal = await _repository.GetGoal(id);
-                if (goal != null)
-                {
-                    await _repository.DeleteGoal(goal);
-                    ret.Success = true;
-                } else
-                {
-                    ret.Error = StaticData.goalFindError;
-                }
-            }
-            catch (Exception e)
-            {
-                ret.Error = e.Message;
-            }
-
+            var ret = await _goalsService.Delete(id);
             return Json(ret);
         }
 
         [HttpPost]
         public async Task<IActionResult> ToggleDone(int id)
         {
-            var ret = new ReturnResult();
-            try
-            {
-                var goal = await _repository.GetGoal(id);
-                if (goal != null)
-                {
-                    goal.IsDone = !goal.IsDone;
-                    await _repository.UpdateGoal(goal);
-                    ret.Success = true;
-                }
-                else
-                {
-                    ret.Error = StaticData.goalFindError;
-                }
-            }
-            catch (Exception e)
-            {
-                ret.Error = e.Message;
-            }
-
+            var ret = await _goalsService.ToggleDone(id);
             return Json(ret);
         }
     }
