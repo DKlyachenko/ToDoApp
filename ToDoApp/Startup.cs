@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ToDoApp.Core;
+using ToDoApp.Core.Services;
 using ToDoApp.DAL;
 using ToDoApp.DAL.Data;
 
@@ -29,6 +31,8 @@ namespace ToDoApp
             string connection = Configuration.GetConnectionString("DefaultConnection");
 
             services.AddScoped<IRepository, DbRepository>();
+            services.AddScoped<TasksService>();
+            services.AddScoped<GoalsService>();
 
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(connection,

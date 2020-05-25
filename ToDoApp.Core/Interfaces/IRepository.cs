@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ToDoApp.Core.Models;
 
-namespace ToDoApp.DAL
+namespace ToDoApp.Core
 {
     public interface IRepository
     {
